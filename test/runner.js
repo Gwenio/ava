@@ -592,7 +592,7 @@ test('macros: Additional args will be spread as additional args on implementatio
 	});
 });
 
-test('Test\'s additional args will be spread and passed down to beforeEach, afterEach implementation functions', t => {
+test('A test\'s hook options will be passed to beforeEach and afterEach hooks', t => {
 	t.plan(5);
 
 	return promiseEnd(new Runner(), runner => {
@@ -602,27 +602,27 @@ test('Test\'s additional args will be spread and passed down to beforeEach, afte
 			}
 		});
 
-		runner.chain.beforeEach((a, ...rest) => {
-			t.deepEqual(rest, ['foo', 'bar']);
+		runner.chain.beforeEach(a => {
+			t.deepEqual(a.options, {foo: true, bar: false});
 			a.pass();
 		});
-		runner.chain.afterEach((a, ...rest) => {
-			t.deepEqual(rest, ['foo', 'bar']);
+		runner.chain.afterEach(a => {
+			t.deepEqual(a.options, {foo: true, bar: false});
 			a.pass();
 		});
-		runner.chain.afterEach.always((a, ...rest) => {
-			t.deepEqual(rest, ['foo', 'bar']);
+		runner.chain.afterEach.always(a => {
+			t.deepEqual(a.options, {foo: true, bar: false});
 			a.pass();
 		});
 
-		runner.chain('test1', (a, ...rest) => {
-			t.deepEqual(rest, ['foo', 'bar']);
+		runner.chain('test1', {foo: true, bar: false}, a => {
+			t.is(a.options, undefined);
 			a.pass();
-		}, 'foo', 'bar');
+		});
 	});
 });
 
-test('Test\'s additional args will be concatenated with args of beforeEach, afterEach args', t => {
+test('A test\'s hook options will not be passed to before and after hooks', t => {
 	t.plan(5);
 
 	return promiseEnd(new Runner(), runner => {
@@ -632,23 +632,23 @@ test('Test\'s additional args will be concatenated with args of beforeEach, afte
 			}
 		});
 
-		runner.chain.beforeEach((a, ...rest) => {
-			t.deepEqual(rest, ['baz', 'foo', 'bar']);
+		runner.chain.before(a => {
+			t.deepEqual(a.options, undefined);
 			a.pass();
-		}, 'baz');
-		runner.chain.afterEach((a, ...rest) => {
-			t.deepEqual(rest, ['baz', 'foo', 'bar']);
+		});
+		runner.chain.after(a => {
+			t.deepEqual(a.options, undefined);
 			a.pass();
-		}, 'baz');
-		runner.chain.afterEach.always((a, ...rest) => {
-			t.deepEqual(rest, ['baz', 'foo', 'bar']);
+		});
+		runner.chain.after.always(a => {
+			t.deepEqual(a.options, undefined);
 			a.pass();
-		}, 'baz');
+		});
 
-		runner.chain('test1', (a, ...rest) => {
-			t.deepEqual(rest, ['foo', 'bar']);
+		runner.chain('test1', {foo: true, bar: false}, a => {
+			t.is(a.options, undefined);
 			a.pass();
-		}, 'foo', 'bar');
+		});
 	});
 });
 
